@@ -153,7 +153,7 @@ class ConstructorTests: XCTestCase { // swiftlint:disable:this type_body_length
         YamsAssertEqual(objects, expected)
     }
 
-    func testMerge() throws { // swiftlint:disable:this function_body_length
+    func testMerge() throws {
         let example = """
             ---
             - &CENTER { x: 1, 'y': 2 }
@@ -228,14 +228,15 @@ class ConstructorTests: XCTestCase { // swiftlint:disable:this type_body_length
                 "canonical": NSNull(),
                 "english": NSNull(),
                 "~": "null key" // null key is not supported yet.
-            ], [
+            ] as [String: Any],
+            [
                 "sparse": [
                     NSNull(),
                     "2nd entry",
                     NSNull(),
                     "4th entry",
                     NSNull()
-                ]
+                ] as [Any]
             ]
         ]
         YamsAssertEqual(objects, expected)

@@ -64,6 +64,8 @@ extension Dictionary: NodeRepresentable {
 private func represent(_ value: Any) throws -> Node {
     if let representable = value as? NodeRepresentable {
         return try representable.represented()
+    } else if (value as? NSDictionary)?.count == 0 {
+        return .mapping(Node.Mapping([]))
     }
     throw YamlError.representer(problem: "Failed to represent \(value)")
 }
@@ -198,7 +200,7 @@ private let doubleFormatter = numberFormatter(with: 15)
 private let floatFormatter = numberFormatter(with: 7)
 
 // TODO: Support `Float80`
-//extension Float80: ScalarRepresentable {}
+// extension Float80: ScalarRepresentable {}
 
 extension BinaryInteger {
     /// This value's `Node.scalar` representation.

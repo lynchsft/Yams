@@ -6,11 +6,12 @@ let package = Package(
     products: [
         .library(name: "Yams", targets: ["Yams"])
     ],
+    dependencies: [],
     targets: [
         .target(
             name: "CYaml",
             exclude: ["CMakeLists.txt"],
-            cSettings: [.define("YAML_DECLARE_EXPORT")]
+            cSettings: [.define("YAML_DECLARE_STATIC")]
         ),
         .target(
             name: "Yams",

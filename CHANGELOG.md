@@ -10,7 +10,71 @@
 
 ##### Bug Fixes
 
+* Empty dictionaries can be now represented, regardless of its key or element
+  type information.  
+  [JP Simard](https://github.com/jpsim)
+  [#393](https://github.com/jpsim/Yams/issues/393)
+
+## 5.0.5
+
+##### Breaking
+
 * None.
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* Fix using Yams from bazel without bzlmod.  
+  [Keith Smiley](https://github.com/keith)
+
+## 5.0.4
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Statically link `CYaml` when building with SwiftPM.  
+  [Saleem Abdulrasool](https://github.com/compnerd)
+
+##### Bug Fixes
+
+* None.
+
+## 5.0.3
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Added support for bzlmod.  
+  [Keith Smiley](https://github.com/keith)
+
+##### Bug Fixes
+
+* None.
+
+## 5.0.1
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* Build CYaml as PIC (Position Independent Code) when building with
+  CMake.  
+  [Yuta Saito](https://github.com/kateinoigakukun)
 
 ## 5.0.0
 

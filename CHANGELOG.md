@@ -10,6 +10,21 @@
 
 ##### Bug Fixes
 
+* None.
+
+## 5.0.6
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Allow decoding from an existing Node.  
+  [Rob Napier](https://github.com/rnapier)
+
+##### Bug Fixes
+
 * Empty dictionaries can be now represented, regardless of its key or element
   type information.  
   [JP Simard](https://github.com/jpsim)

@@ -254,6 +254,9 @@ public final class Emitter {
 
         /// Set the style for mappings (dictionaries)
         public var mappingStyle: Node.Mapping.Style = .any
+        
+        /// Redundancy aliasing strategy to use when encoding. Defaults to nil
+        public var redundancyAliasingStrategy: RedundancyAliasingStrategy?
     }
 
     /// Configuration options to use when emitting YAML.
@@ -418,7 +421,10 @@ extension Emitter.Options {
     /// - parameter sequenceStyle: Set the style for sequences (arrays / lists)
     /// - parameter mappingStyle:  Set the style for mappings (dictionaries)
     public init(canonical: Bool = false, indent: Int = 0, width: Int = 0, allowUnicode: Bool = false,
-                lineBreak: Emitter.LineBreak = .ln, version: (major: Int, minor: Int)? = nil,
+                lineBreak: Emitter.LineBreak = .ln,
+                explicitStart: Bool = false,
+                explicitEnd: Bool = false,
+                version: (major: Int, minor: Int)? = nil,
                 sortKeys: Bool = false, sequenceStyle: Node.Sequence.Style = .any,
                 mappingStyle: Node.Mapping.Style = .any) {
         self.canonical = canonical
@@ -426,6 +432,8 @@ extension Emitter.Options {
         self.width = width
         self.allowUnicode = allowUnicode
         self.lineBreak = lineBreak
+        self.explicitStart = explicitStart
+        self.explicitEnd = explicitEnd
         self.version = version
         self.sortKeys = sortKeys
         self.sequenceStyle = sequenceStyle
@@ -447,7 +455,16 @@ extension Emitter {
         case .scalar(let scalar): try serializeScalar(scalar)
         case .sequence(let sequence): try serializeSequence(sequence)
         case .mapping(let mapping): try serializeMapping(mapping)
+        case .alias(let alias): try serializeAlias(alias)
         }
+    }
+    
+    private func serializeAlias(_ alias: Node.Alias) throws {
+        var event = yaml_event_t()
+        let anchor = alias.anchor.rawValue
+        yaml_alias_event_initialize(&event,
+                                    anchor)
+        try emit(&event)
     }
 
     private func serializeScalar(_ scalar: Node.Scalar) throws {
@@ -458,7 +475,7 @@ extension Emitter {
             tag.withUnsafeMutableBytes { tag in
                 yaml_scalar_event_initialize(
                     &event,
-                    nil,
+                    scalar.anchor?.rawValue,
                     tag.baseAddress?.assumingMemoryBound(to: UInt8.self),
                     value.baseAddress?.assumingMemoryBound(to: UInt8.self),
                     Int32(value.count - 1),
@@ -478,7 +495,7 @@ extension Emitter {
         _ = tag.withUnsafeMutableBytes { tag in
             yaml_sequence_start_event_initialize(
                 &event,
-                nil,
+                sequence.anchor?.rawValue,
                 tag.baseAddress?.assumingMemoryBound(to: UInt8.self),
                 implicit,
                 sequenceStyle)
@@ -497,7 +514,7 @@ extension Emitter {
         _ = tag.withUnsafeMutableBytes { tag in
             yaml_mapping_start_event_initialize(
                 &event,
-                nil,
+                mapping.anchor?.rawValue,
                 tag.baseAddress?.assumingMemoryBound(to: UInt8.self),
                 implicit,
                 mappingStyle)

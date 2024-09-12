@@ -28,10 +28,16 @@ public class YAMLEncoder {
     /// - throws: `EncodingError` if something went wrong while encoding.
     public func encode<T: Swift.Encodable>(_ value: T, userInfo: [CodingUserInfoKey: Any] = [:]) throws -> String {
         do {
-            let encoder = _Encoder(userInfo: userInfo, sequenceStyle: options.sequenceStyle,
+            var finalUserInfo = userInfo
+            if let aliasingStrategy = options.redundancyAliasingStrategy {
+                finalUserInfo[.redundancyAliasingStrategyKey] = aliasingStrategy
+            }
+            let encoder = _Encoder(userInfo: finalUserInfo,
+                                   sequenceStyle: options.sequenceStyle,
                                    mappingStyle: options.mappingStyle)
             var container = encoder.singleValueContainer()
             try container.encode(value)
+            try options.redundancyAliasingStrategy?.releaseAnchorReferences()
             return try serialize(node: encoder.node, options: options)
         } catch let error as EncodingError {
             throw error
@@ -157,7 +163,13 @@ private struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerPr
     var codingPath: [CodingKey] { return encoder.codingPath }
     func encodeNil(forKey key: Key) throws { encoder.mapping[key.stringValue] = .null }
     func encode<T>(_ value: T, forKey key: Key) throws where T: YAMLEncodable { try encoder(for: key).encode(value) }
-    func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable { try encoder(for: key).encode(value) }
+    func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
+        if let anchor = value as? Anchor {
+            encoder.node = encoder.node.setting(anchor: anchor)
+        } else {
+            try encoder(for: key).encode(value)
+        }
+    }
 
     func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type,
                                     forKey key: Key) -> KeyedEncodingContainer<NestedKey> {
@@ -217,15 +229,43 @@ extension _Encoder: SingleValueEncodingContainer {
 
     func encode<T>(_ value: T) throws where T: YAMLEncodable {
         assertCanEncodeNewValue()
-        node = value.box()
+        try encode(yamlEncodable: value)
+    }
+    
+    private func encode(yamlEncodable encodable: YAMLEncodable) throws {
+        if let redundancyAliasingStrategy = userInfo[.redundancyAliasingStrategyKey] as? RedundancyAliasingStrategy {
+            switch try redundancyAliasingStrategy.alias(for: encodable) {
+            case .none:
+                node = encodable.box()
+            case let .anchor(anchor):
+                node = encodable.box()
+                self.node = self.node.setting(anchor: anchor)
+            case let .alias(anchor):
+                self.node = .alias(.init(anchor))
+            }
+        } else {
+            node = encodable.box()
+        }
     }
 
     func encode<T>(_ value: T) throws where T: Encodable {
         assertCanEncodeNewValue()
         if let encodable = value as? YAMLEncodable {
-            node = encodable.box()
+            try encode(yamlEncodable: encodable)
         } else {
-            try value.encode(to: self)
+            if let redundancyAliasingStrategy = userInfo[.redundancyAliasingStrategyKey] as? RedundancyAliasingStrategy {
+                switch try redundancyAliasingStrategy.alias(for: value) {
+                case .none:
+                    try value.encode(to: self)
+                case let .anchor(anchor):
+                    try value.encode(to: self)
+                    self.node = self.node.setting(anchor: anchor)
+                case let .alias(anchor):
+                    self.node = .alias(.init(anchor))
+                }
+            } else {
+                try value.encode(to: self)
+            }
         }
     }
 

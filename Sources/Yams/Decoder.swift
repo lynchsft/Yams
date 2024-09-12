@@ -48,8 +48,17 @@ public class YAMLDecoder {
                           from yaml: String,
                           userInfo: [CodingUserInfoKey: Any] = [:]) throws -> T where T: Swift.Decodable {
         do {
-            let node = try Parser(yaml: yaml, resolver: Resolver([.merge]), encoding: encoding).singleRoot() ?? ""
-            return try self.decode(type, from: node, userInfo: userInfo)
+            let parser = try Parser(yaml: yaml, resolver: Resolver([.merge]), encoding: encoding)
+            // ^ the parser holds the references to Anchors while parsing,
+            return try withExtendedLifetime(parser) {
+                //^ so we hold an explicit reference to the parser during decoding
+                let node = try parser.singleRoot() ?? ""
+                // ^ nodes only have weak references to Anchors (the Anchors would disappear if not held by the parser)
+                return try self.decode(type, from: node, userInfo: userInfo)
+                // ^ if the decoded type or contained types are YamlAnchorCoding, 
+                // those types have taken ownership of Anchors.
+                // Otherwise the Anchors are deallocated when this function exits just like Tag and Mark
+            }
         } catch let error as DecodingError {
             throw error
         } catch {
@@ -129,6 +138,8 @@ private struct _Decoder: Decoder {
             throw _typeMismatch(at: codingPath, expectation: Node.Scalar.self, reality: mapping)
         case .sequence(let sequence):
             throw _typeMismatch(at: codingPath, expectation: Node.Scalar.self, reality: sequence)
+        case .alias(let alias):
+            throw _typeMismatch(at: codingPath, expectation: Node.Scalar.self, reality: alias)
         }
     }
 }
@@ -140,7 +151,14 @@ private struct _KeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerPr
 
     init(decoder: _Decoder, wrapping mapping: Node.Mapping) {
         self.decoder = decoder
-        self.mapping = mapping
+        
+        if let anchor = mapping.anchor, mapping.keys.contains(.anchorKeyNode) == false {
+            var mutableMapping = mapping
+            mutableMapping[.anchorKeyNode] = .scalar(.init(anchor.rawValue))
+            self.mapping = mutableMapping
+        } else {
+            self.mapping = mapping
+        }
     }
 
     // MARK: - Swift.KeyedDecodingContainerProtocol Methods

@@ -16,11 +16,12 @@ class TagTolerancesTests: XCTestCase {
         var extraneousValue: Int
     }
     
-    /// Any type that is Encodable and contains an `Tag`value will encode to a yaml tag
+    /// Any type that is Encodable and contains an `Tag`value but with a coding key different from YamlTagProviding
+    /// will not encode to a yaml tag
     /// This may be unexpected
     func testTagEncoding_undeclaredBehavior() throws {
         let expectedYAML = """
-                           !<I-did-it-myyyyy-way>
+                           myCustomTagDeclaration: I-did-it-myyyyy-way
                            extraneousValue: 3
                            
                            """
@@ -33,17 +34,43 @@ class TagTolerancesTests: XCTestCase {
         XCTAssertEqual(producedYAML, expectedYAML, "Produced YAML not identical to expected YAML.")
     }
     
-    /// Any type that is Encodable and contains an `Tag`value will try to encode to a yaml tag
+    /// Any type that is Encodable and contains an `Tag`value with the same coding key as YamlTagProviding
+    /// will encode to a yaml tag even though the type does not conform to YamlTagProviding
+    /// This may be unexpected
+    func testTagEncoding_undeclaredBehavior_7() throws {
+        struct Example: Codable, Hashable {
+            var yamlTag: Tag
+            var extraneousValue: Int
+        }
+        let expectedYAML = """
+                           !<I-did-it-myyyyy-way>
+                           extraneousValue: 3
+                           
+                           """
+
+        let value = Example(yamlTag: "I-did-it-myyyyy-way",
+                            extraneousValue: 3)
+
+        let encoder = YAMLEncoder()
+        let producedYAML = try encoder.encode(value)
+        XCTAssertEqual(producedYAML, expectedYAML, "Produced YAML not identical to expected YAML.")
+    }
+    
     /// Tags are oddly permissive, but some characters do get escaped
     /// This may be unexpected
     func testTagEncoding_undeclaredBehavior_4() throws {
+        struct Example: Codable, Hashable, YamlTagProviding {
+            var yamlTag: Tag?
+            var extraneousValue: Int
+        }
+        
         let expectedYAML = """
                            !<I-did-it-[]-*-%7C-%21-()way>
                            extraneousValue: 3
                            
                            """
         
-        let value = Example(myCustomTagDeclaration: "I-did-it-[]-*-|-!-()way",
+        let value = Example(yamlTag: "I-did-it-[]-*-|-!-()way",
                             extraneousValue: 3)
         
         let encoder = YAMLEncoder()
@@ -51,8 +78,8 @@ class TagTolerancesTests: XCTestCase {
         XCTAssertEqual(producedYAML, expectedYAML, "Produced YAML not identical to expected YAML.")
     }
 
-    /// Any type that is Decodable and contains an `Tag` value will not
-    /// decode an tag from the text representation.
+    /// Any type that is Decodable and contains an `Tag` value but with a coding key different from YamlTagProviding
+    /// will not decode an tag from the text representation.
     /// In this case a key not found error will be thrown during decoding
     /// This may be unexpected
     func testTagDecoding_undeclaredBehavior_1() throws {
@@ -66,9 +93,8 @@ class TagTolerancesTests: XCTestCase {
         // error is ^^ key not found, "myCustomTagDeclaration"
     }
     
-    /// Any type that is Decodable and contains an `Tag` value will not
-    /// decode an tag from the text representation.
-    /// In this case the decoding is successful and the tag is respected by the parser.
+    /// Any type that is Decodable and contains an `Tag` value but with a coding key different from YamlTagProviding
+    /// will not decode an tag from the text representation.
     /// This may be unexpected
     func testTagDecoding_undeclaredBehavior_6() throws {
         struct Example: Codable, Hashable {
@@ -89,9 +115,30 @@ class TagTolerancesTests: XCTestCase {
         XCTAssertEqual(decodedValue, expectedValue, "\(Example.self) did not round-trip to an equal value.")
     }
     
-    /// Any type that is Decodable and contains an `Tag` value will not
-    /// decode an tag from the text representation.
-    /// In this case the decoding is successful and the tag is respected by the parser.
+    /// Any type that is Decodable and contains an `Tag` value with the same coding key as YamlTagProviding
+    /// will decode an tag from the text representatio even though the type does not conform to YamlTagCoding.
+    /// This may be unexpected
+    func testTagDecoding_undeclaredBehavior_8() throws {
+        struct Example: Codable, Hashable {
+            var yamlTag: Tag?
+            var extraneousValue: Int
+        }
+        let sourceYAML = """
+                           !<a-different-tag>
+                           extraneousValue: 3
+                           
+                           """
+        
+        let expectedValue = Example(yamlTag: "a-different-tag",
+                                    extraneousValue: 3)
+        
+        let decoder = YAMLDecoder()
+        let decodedValue = try decoder.decode(Example.self, from: sourceYAML)
+        XCTAssertEqual(decodedValue, expectedValue, "\(Example.self) did not round-trip to an equal value.")
+    }
+    
+    /// Any type that is Decodable and contains an `Tag` value but with a coding key different from YamlTagProviding
+    /// will not decode an tag from the text representation.
     /// This is expected behavior, but in a strange situation.
     func testTagDecoding_undeclaredBehavior_3() throws {
         let sourceYAML = """
@@ -109,10 +156,8 @@ class TagTolerancesTests: XCTestCase {
         
     }
     
-    /// Any type that is Decodable and contains an `Tag` value will not
-    /// decode an tag from the text representation.
-    /// In this case the decoding is successful even though and the `Tag` was initialized with unsupported characters.
-    /// The tag is respected by the parser.
+    /// Any type that is Decodable and contains an `Tag` value but with a coding key different from YamlTagProviding
+    /// will not decode an tag from the text representation.
     /// This is expected behavior, but in a strange situation.
     func testTagDecoding_undeclaredBehavior_2() throws {
         let sourceYAML = """

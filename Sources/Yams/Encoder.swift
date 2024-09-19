@@ -164,9 +164,9 @@ private struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerPr
     func encodeNil(forKey key: Key) throws { encoder.mapping[key.stringValue] = .null }
     func encode<T>(_ value: T, forKey key: Key) throws where T: YAMLEncodable { try encoder(for: key).encode(value) }
     func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
-        if let anchor = value as? Anchor {
+        if let anchor = value as? Anchor, key.stringValue == Node.anchorKeyNode.string {
             encoder.node = encoder.node.setting(anchor: anchor)
-        } else if let tag = value as? Tag {
+        } else if let tag = value as? Tag, key.stringValue == Node.tagKeyNode.string {
             encoder.node = encoder.node.setting(tag: tag)
         } else {
             try encoder(for: key).encode(value)

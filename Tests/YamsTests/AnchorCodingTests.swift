@@ -1,6 +1,6 @@
 //
 //  AnchorEncodingTests.swift
-//
+//  Yams
 //
 //  Created by Adora Lynch on 8/9/24.
 //  Copyright (c) 2016 Yams. All rights reserved.
@@ -9,7 +9,7 @@
 import XCTest
 import Yams
 
-class AnchorEncodingTests: XCTestCase {
+class AnchorCodingTests: XCTestCase {
     
     /// Test the encoding of a yaml anchor using a type that conforms to YamlAnchorProviding
     func testYamlAnchorProviding_valuePresent() throws {
@@ -19,8 +19,8 @@ class AnchorEncodingTests: XCTestCase {
                        expectedYAML:"""
                                     &simple
                                     nested:
-                                      someValue: it's a value
-                                    anotherValue: 52
+                                      stringValue: it's a value
+                                    intValue: 52
                                     
                                     """ ) // ^ the Yams.Anchor is encoded as a yaml anchor
     }
@@ -34,8 +34,8 @@ class AnchorEncodingTests: XCTestCase {
         _testRoundTrip(of: simpleStruct,
                        expectedYAML:"""
                                     nested:
-                                      someValue: it's a value
-                                    anotherValue: 52
+                                      stringValue: it's a value
+                                    intValue: 52
                                     yamlAnchor: but typed as a string
                                     
                                     """ ) // ^ the member is _not_ treated as an anchor
@@ -49,8 +49,8 @@ class AnchorEncodingTests: XCTestCase {
         _testRoundTrip(of: expectedStruct,
                        expectedYAML: """
                                      nested:
-                                       someValue: it's a value
-                                     anotherValue: 52
+                                       stringValue: it's a value
+                                     intValue: 52
                                      
                                      """)
     }
@@ -69,8 +69,8 @@ class AnchorEncodingTests: XCTestCase {
         let data = """
                    &AnActualAnchor
                    nested:
-                     someValue: it's a value
-                   anotherValue: 52
+                     stringValue: it's a value
+                   intValue: 52
                    
                    """.data(using: .utf8)!
         
@@ -102,12 +102,12 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     first:
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     second:
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     
                                     """ )
     }
@@ -123,12 +123,12 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     first: &simple
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     second:
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     
                                     """ )
     }
@@ -143,12 +143,12 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     first: &simple
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     second: &simple
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     
                                     """ )
     }
@@ -166,8 +166,8 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     - &simple
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     - *simple
                                     
                                     """ )
@@ -185,8 +185,8 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     - &2
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     - *2
                                     
                                     """ )
@@ -205,11 +205,11 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     first: &simple
                                       nested: &2
-                                        someValue: it's a value
-                                      anotherValue: &4 52
+                                        stringValue: it's a value
+                                      intValue: &4 52
                                     second:
                                       nested: *2
-                                      anotherValue: *4
+                                      intValue: *4
                                     
                                     """ )
     }
@@ -228,18 +228,18 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     first:
                                       nested: &3
-                                        someValue: it's a value
-                                      anotherValue: &5 52
+                                        stringValue: it's a value
+                                      intValue: &5 52
                                     second:
                                       nested: *3
-                                      anotherValue: *5
+                                      intValue: *5
                                     
                                     """ )
     }
     
     /// If types conform to YamlAnchorProviding and have exactly the same encoded representation then StrictEncodableAliasingStrategy alias them
     /// even though they are encoded and decoded from different types.
-    func testEncoderAutoAlias_StrictCodable_NoAnchors() throws {
+    func testEncoderAutoAlias_StrictEncodable_NoAnchors() throws {
         let differentTypesNoAnchors = SimplePair(first: SimpleWithoutAnchor2(nested: .init(stringValue: "it's a value"), intValue: 52),
                                                 second: SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"), intValue: 52))
         
@@ -250,8 +250,8 @@ class AnchorAliasingTests: XCTestCase {
                        expectedYAML:"""
                                     first: &2
                                       nested:
-                                        someValue: it's a value
-                                      anotherValue: 52
+                                        stringValue: it's a value
+                                      intValue: 52
                                     second: *2
                                     
                                     """ )

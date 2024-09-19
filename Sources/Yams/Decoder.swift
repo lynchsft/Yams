@@ -152,12 +152,39 @@ private struct _KeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerPr
     init(decoder: _Decoder, wrapping mapping: Node.Mapping) {
         self.decoder = decoder
         
-        if let anchor = mapping.anchor, mapping.keys.contains(.anchorKeyNode) == false {
+        let keys = mapping.keys
+        
+        let decodeAnchor: Anchor?
+        let decodeTag: Tag?
+        
+        if let anchor = mapping.anchor, keys.contains(.anchorKeyNode) == false {
+            decodeAnchor = anchor
+        } else {
+            decodeAnchor = nil
+        }
+        
+        if mapping.tag.name != .implicit && keys.contains(.tagKeyNode) == false {
+            decodeTag = mapping.tag
+        } else {
+            decodeTag = nil
+        }
+        
+        switch (decodeAnchor, decodeTag) {
+        case (nil, nil):
+            self.mapping = mapping
+        case (let anchor?, nil):
             var mutableMapping = mapping
             mutableMapping[.anchorKeyNode] = .scalar(.init(anchor.rawValue))
             self.mapping = mutableMapping
-        } else {
-            self.mapping = mapping
+        case (nil, let tag?):
+            var mutableMapping = mapping
+            mutableMapping[.tagKeyNode] = .scalar(.init(tag.name.rawValue))
+            self.mapping = mutableMapping
+        case let (anchor?, tag?):
+            var mutableMapping = mapping
+            mutableMapping[.anchorKeyNode] = .scalar(.init(anchor.rawValue))
+            mutableMapping[.tagKeyNode] = .scalar(.init(tag.name.rawValue))
+            self.mapping = mutableMapping
         }
     }
 

@@ -321,4 +321,21 @@ extension Node {
             return .alias(alias)
         }
     }
+    
+    func setting(tag: Tag) -> Self {
+        switch self {
+        case var .mapping(mapping):
+            mapping.tag = tag
+            return .mapping(mapping)
+        case var .sequence(sequence):
+            sequence.tag = tag
+            return .sequence(sequence)
+        case var .scalar(scalar):
+            scalar.tag = tag
+            return .scalar(scalar)
+        case var .alias(alias):
+            alias.tag = tag
+            return .alias(alias)
+        }
+    }
 }

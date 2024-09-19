@@ -166,6 +166,8 @@ private struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerPr
     func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
         if let anchor = value as? Anchor {
             encoder.node = encoder.node.setting(anchor: anchor)
+        } else if let tag = value as? Tag {
+            encoder.node = encoder.node.setting(tag: tag)
         } else {
             try encoder(for: key).encode(value)
         }

@@ -274,7 +274,7 @@ public final class Parser {
             // because yaml anchors are allowed to shadow one another.
             //
             // The map will keep the latest reference as expected
-            // but without the list  the map will release reference to
+            // but without the list the map will release reference to
             // one of the Anchor instances whenever duplicates are encountered.
             _anchorMap[anchor] = node
         }

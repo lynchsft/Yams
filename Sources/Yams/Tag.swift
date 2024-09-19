@@ -92,11 +92,9 @@ extension Tag: RawRepresentable {
     public var rawValue: String {
         name.rawValue
     }
-    
-    public typealias RawValue = String
 }
 
-extension Tag: Codable {} 
+extension Tag: Codable {}
 
 extension Tag: ExpressibleByStringLiteral {
     /// :nodoc:

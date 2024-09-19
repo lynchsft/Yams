@@ -3,7 +3,7 @@
 //  Yams
 //
 //  Created by Adora Lynch on 8/9/24.
-//  Copyright (c) 2016 Yams. All rights reserved.
+//  Copyright (c) 2024 Yams. All rights reserved.
 //
 
 import XCTest

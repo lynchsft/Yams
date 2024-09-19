@@ -8,10 +8,15 @@
 
 import Foundation
 
+/// Types that conform to YamlAnchorProviding and Encodable can optionally dictate the name of
+/// a yaml anchor when they are encoded with YAMLEncoder
 public protocol YamlAnchorProviding {
     var yamlAnchor: Anchor? { get }
 }
 
+/// YamlAnchorCoding refines YamlAnchorProviding.
+/// Types that conform to YamlAnchorCoding and Decodable can decode yaml anchors
+/// from source documents into `Anchor` values for reference or modification in memory.
 public protocol YamlAnchorCoding: YamlAnchorProviding {
     var yamlAnchor: Anchor? { get set }
 }

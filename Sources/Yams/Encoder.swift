@@ -34,7 +34,8 @@ public class YAMLEncoder {
             }
             let encoder = _Encoder(userInfo: finalUserInfo,
                                    sequenceStyle: options.sequenceStyle,
-                                   mappingStyle: options.mappingStyle)
+                                   mappingStyle: options.mappingStyle,
+                                   newlineScalarStyle: options.newLineScalarStyle)
             var container = encoder.singleValueContainer()
             try container.encode(value)
             try options.redundancyAliasingStrategy?.releaseAnchorReferences()
@@ -55,11 +56,12 @@ private class _Encoder: Swift.Encoder {
     var node: Node = .unused
 
     init(userInfo: [CodingUserInfoKey: Any] = [:], codingPath: [CodingKey] = [], sequenceStyle: Node.Sequence.Style,
-         mappingStyle: Node.Mapping.Style) {
+         mappingStyle: Node.Mapping.Style, newlineScalarStyle: Node.Scalar.Style) {
         self.userInfo = userInfo
         self.codingPath = codingPath
         self.sequenceStyle = sequenceStyle
         self.mappingStyle = mappingStyle
+        self.newlineScalarStyle = newlineScalarStyle
     }
 
     // MARK: - Swift.Encoder Methods
@@ -68,6 +70,7 @@ private class _Encoder: Swift.Encoder {
     let userInfo: [CodingUserInfoKey: Any]
     let sequenceStyle: Node.Sequence.Style
     let mappingStyle: Node.Mapping.Style
+    let newlineScalarStyle: Node.Scalar.Style
 
     func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> {
         if canEncodeNewValue {
@@ -129,15 +132,21 @@ private class _ReferencingEncoder: _Encoder {
     init(referencing encoder: _Encoder, key: CodingKey) {
         self.encoder = encoder
         reference = .mapping(key.stringValue)
-        super.init(userInfo: encoder.userInfo, codingPath: encoder.codingPath + [key],
-                   sequenceStyle: encoder.sequenceStyle, mappingStyle: encoder.mappingStyle)
+        super.init(userInfo: encoder.userInfo,
+                   codingPath: encoder.codingPath + [key],
+                   sequenceStyle: encoder.sequenceStyle,
+                   mappingStyle: encoder.mappingStyle,
+                   newlineScalarStyle: encoder.newlineScalarStyle)
     }
 
     init(referencing encoder: _Encoder, at index: Int) {
         self.encoder = encoder
         reference = .sequence(index)
-        super.init(userInfo: encoder.userInfo, codingPath: encoder.codingPath + [_YAMLCodingKey(index: index)],
-                   sequenceStyle: encoder.sequenceStyle, mappingStyle: encoder.mappingStyle)
+        super.init(userInfo: encoder.userInfo,
+                   codingPath: encoder.codingPath + [_YAMLCodingKey(index: index)],
+                   sequenceStyle: encoder.sequenceStyle,
+                   mappingStyle: encoder.mappingStyle,
+                   newlineScalarStyle: encoder.newlineScalarStyle)
     }
 
     deinit {
@@ -235,18 +244,24 @@ extension _Encoder: SingleValueEncodingContainer {
     }
     
     private func encode(yamlEncodable encodable: YAMLEncodable) throws {
+        func encodeNode() {
+            node = encodable.box()
+            if let stringValue = encodable as? (any StringProtocol), stringValue.contains("\n") {
+                node.scalar?.style = newlineScalarStyle
+            }
+        }
         if let redundancyAliasingStrategy = userInfo[.redundancyAliasingStrategyKey] as? RedundancyAliasingStrategy {
             switch try redundancyAliasingStrategy.alias(for: encodable) {
             case .none:
-                node = encodable.box()
+                encodeNode()
             case let .anchor(anchor):
-                node = encodable.box()
+                encodeNode()
                 self.node = self.node.setting(anchor: anchor)
             case let .alias(anchor):
                 self.node = .alias(.init(anchor))
             }
         } else {
-            node = encodable.box()
+            encodeNode()
         }
     }
 

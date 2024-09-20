@@ -2,6 +2,86 @@
 
 ##### Breaking
 
+* Swift 5.7 or later is now required to build Yams.  
+  [JP Simard](https://github.com/jpsim)
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* None.
+
+## 5.1.3
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Add support for visionOS.  
+  [ruralharry](http://github.com/ruralharry)
+
+* Add support for Android.  
+  [finagolfin](http://github.com/finagolfin)
+
+* Add support for Bazel's `rules_swift` 2.x versions.  
+  [Luis Padron](https://github.com/luispadron)
+
+##### Bug Fixes
+
+* Fix CI workflows.  
+  [Tony Arnold](https://github.com/tonyarnold)
+
+## 5.1.2
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* Fix support for Bazel 7.x.  
+  [JP Simard](https://github.com/jpsim)
+
+## 5.1.1
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Allow specifying a `newLineScalarStyle` for encoding string scalars with
+  newlines when using `YAMLEncoder`.  
+  [Tejas Sharma](https://github.com/tejassharma96)
+  [#405](https://github.com/jpsim/Yams/issues/405)
+
+* Improve support for Bazel 7.x.  
+  [JP Simard](https://github.com/jpsim)
+
+##### Bug Fixes
+
+* None.
+
+## 5.1.0
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
 * Change how empty strings are decoded into nullable properties.
   `key: ""` previously decoded into
   `struct Value: Codable { let key: String? }` as `Value(key: nil)`
@@ -11,13 +91,9 @@
   [Liam Nichols](https://github.com/liamnichols)
   [#301](https://github.com/jpsim/Yams/issues/301)
 
-##### Enhancements
-
-* None.
-
-##### Bug Fixes
-
-* None.
+* Fix parsing of unquoted URLs into Strings.  
+  [Honza Dvorsky](https://github.com/czechboy0)
+  [#337](https://github.com/jpsim/Yams/issues/337)
 
 ## 5.0.6
 

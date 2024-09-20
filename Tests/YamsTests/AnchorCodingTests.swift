@@ -159,8 +159,7 @@ class AnchorAliasingTests: XCTestCase {
         let simpleStruct = SimpleWithAnchor(nested: .init(stringValue: "it's a value"), intValue: 52)
         let duplicatedStructArray = [simpleStruct, simpleStruct]
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: duplicatedStructArray,
                        with: options,
                        expectedYAML:"""
@@ -178,8 +177,7 @@ class AnchorAliasingTests: XCTestCase {
         let simpleStruct = SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"), intValue: 52)
         let duplicatedStructArray = [simpleStruct, simpleStruct] // zero specified anchor
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: duplicatedStructArray,
                        with: options,
                        expectedYAML:"""
@@ -198,8 +196,7 @@ class AnchorAliasingTests: XCTestCase {
         let differentTypesOneAnchors = SimplePair(first: SimpleWithAnchor(nested: .init(stringValue: "it's a value"), intValue: 52),
                                                  second: SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"), intValue: 52))
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: differentTypesOneAnchors,
                        with: options,
                        expectedYAML:"""
@@ -221,8 +218,7 @@ class AnchorAliasingTests: XCTestCase {
         let differentTypesNoAnchors = SimplePair(first: SimpleWithoutAnchor2(nested: .init(stringValue: "it's a value"), intValue: 52),
                                                  second: SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"), intValue: 52))
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: differentTypesNoAnchors,
                        with: options,
                        expectedYAML:"""

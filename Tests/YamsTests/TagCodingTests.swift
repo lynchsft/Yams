@@ -97,8 +97,7 @@ class TagWithAnchorCodingTests: XCTestCase {
         let simpleStruct = SimpleWithTag(nested: .init(stringValue: "it's a value"), intValue: 52)
         let duplicatedStructArray = [simpleStruct, simpleStruct]
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: duplicatedStructArray,
                        with: options,
                        expectedYAML:"""
@@ -117,8 +116,7 @@ class TagWithAnchorCodingTests: XCTestCase {
         let differentTypesOneTags = SimplePair(first: SimpleWithTag(nested: .init(stringValue: "it's a value"), intValue: 52),
                                                  second: SimpleWithoutTag(nested: .init(stringValue: "it's a value"), intValue: 52))
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: differentTypesOneTags,
                        with: options,
                        expectedYAML:"""
@@ -139,8 +137,7 @@ class TagWithAnchorCodingTests: XCTestCase {
         let differentTypesOneTags = SimplePair(first: SimpleWithTag(nested: .init(stringValue: "it's a value"), intValue: 52),
                                                  second: SimpleWithTag2(nested: .init(stringValue: "it's a value"), intValue: 52))
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: differentTypesOneTags,
                        with: options,
                        expectedYAML:"""
@@ -180,8 +177,7 @@ class TagWithAnchorCodingTests: XCTestCase {
         let simpleStruct = SimpleWithTagAndAnchor(nested: .init(stringValue: "it's a value"), intValue: 52)
         let duplicatedStructArray = [simpleStruct, simpleStruct]
         
-        var options = YAMLEncoder.Options()
-        options.redundancyAliasingStrategy = HashableAliasingStrategy()
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
         _testRoundTrip(of: duplicatedStructArray,
                        with: options,
                        expectedYAML:"""

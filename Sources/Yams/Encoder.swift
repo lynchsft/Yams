@@ -250,18 +250,27 @@ extension _Encoder: SingleValueEncodingContainer {
                 node.scalar?.style = newlineScalarStyle
             }
         }
+        try resolveAlias(for: encodable, encode: encodeNode)
+    }
+
+    private func resolveAlias(for encodable: any Encodable, encode: () throws -> Void) throws {
         if let redundancyAliasingStrategy = userInfo[.redundancyAliasingStrategyKey] as? RedundancyAliasingStrategy {
             switch try redundancyAliasingStrategy.alias(for: encodable) {
             case .none:
-                encodeNode()
+                try encode()
             case let .anchor(anchor):
-                encodeNode()
-                self.node = self.node.setting(anchor: anchor)
+                try encode()
+                if self.node.isAlias == false {
+                    // Some types are single-value containers, such as types that are RawRepresentable.
+                    // In such cases the result of encoding here may have matched an existing Anchor, producing an alias
+                    // If the encoding already produced an alias, then the anchor we received here is irrelevant.
+                    self.node = self.node.setting(anchor: anchor)
+                }
             case let .alias(anchor):
                 self.node = .alias(.init(anchor))
             }
         } else {
-            encodeNode()
+            try encode()
         }
     }
 
@@ -270,18 +279,7 @@ extension _Encoder: SingleValueEncodingContainer {
         if let encodable = value as? YAMLEncodable {
             try encode(yamlEncodable: encodable)
         } else {
-            if let redundancyAliasingStrategy =
-                userInfo[.redundancyAliasingStrategyKey] as? RedundancyAliasingStrategy {
-                switch try redundancyAliasingStrategy.alias(for: value) {
-                case .none:
-                    try value.encode(to: self)
-                case let .anchor(anchor):
-                    try value.encode(to: self)
-                    self.node = self.node.setting(anchor: anchor)
-                case let .alias(anchor):
-                    self.node = .alias(.init(anchor))
-                }
-            } else {
+            try resolveAlias(for: value) {
                 try value.encode(to: self)
             }
         }

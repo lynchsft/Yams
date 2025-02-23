@@ -227,7 +227,7 @@ class AnchorAliasingTests: XCTestCase {
     /// Hashable-Equal and therefor maybe aliased.
     /// Note particularly that the to Simple* values here have exactly the same encoded representation,
     /// they're just different types and thus not Hashable-Equal
-    func testEncoderAutoAlias_Hashable_noAnchor() throws {
+    func testEncoderAutoAlias_Hashable_NoAnchor() throws {
         let differentTypesNoAnchors = SimplePair(first:
                                                     SimpleWithoutAnchor2(nested: .init(stringValue: "it's a value"),
                                                                          intValue: 52),
@@ -242,10 +242,38 @@ class AnchorAliasingTests: XCTestCase {
                                      first:
                                        nested: &3
                                          stringValue: it's a value
-                                       intValue: &5 52
+                                       intValue: 52
                                      second:
                                        nested: *3
-                                       intValue: *5
+                                       intValue: 52
+
+                                     """ )
+    }
+    
+    /// If types conform to YamlAnchorProviding and are NOT Hashable-Equal then
+    /// HashableAliasingStrategy does not alias them even though their members may still be
+    /// Hashable-Equal and therefor maybe aliased.
+    /// Note particularly that the to Simple* values here have exactly the same encoded representation,
+    /// they're just different types and thus not Hashable-Equal
+    func testEncoderAutoAlias_Hashable_NoAnchor_ReverseOrder() throws {
+        let differentTypesNoAnchors = SimplePair(first:
+                                                    SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"),
+                                                                         intValue: 52),
+                                                 second:
+                                                    SimpleWithoutAnchor2(nested: .init(stringValue: "it's a value"),
+                                                                        intValue: 52))
+
+        let options = YAMLEncoder.Options(redundancyAliasingStrategy: HashableAliasingStrategy())
+        _testRoundTrip(of: differentTypesNoAnchors,
+                       with: options,
+                       expectedYAML: """
+                                     first:
+                                       nested: &3
+                                         stringValue: it's a value
+                                       intValue: 52
+                                     second:
+                                       nested: *3
+                                       intValue: 52
 
                                      """ )
     }
@@ -259,6 +287,31 @@ class AnchorAliasingTests: XCTestCase {
                                                                          intValue: 52),
                                                 second:
                                                     SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"),
+                                                                        intValue: 52))
+
+        var options = YAMLEncoder.Options()
+        options.redundancyAliasingStrategy = StrictEncodableAliasingStrategy()
+        _testRoundTrip(of: differentTypesNoAnchors,
+                       with: options,
+                       expectedYAML: """
+                                     first: &2
+                                       nested:
+                                         stringValue: it's a value
+                                       intValue: 52
+                                     second: *2
+
+                                     """ )
+    }
+    
+    /// If types conform to YamlAnchorProviding and have exactly the same encoded representation then
+    /// StrictEncodableAliasingStrategy alias them even though they are encoded and decoded from
+    ///  different types.
+    func testEncoderAutoAlias_StrictEncodable_NoAnchors_ReverseOrder() throws {
+        let differentTypesNoAnchors = SimplePair(first:
+                                                    SimpleWithoutAnchor(nested: .init(stringValue: "it's a value"),
+                                                                         intValue: 52),
+                                                second:
+                                                    SimpleWithoutAnchor2(nested: .init(stringValue: "it's a value"),
                                                                         intValue: 52))
 
         var options = YAMLEncoder.Options()
@@ -289,10 +342,11 @@ private struct NestedStruct: Codable, Hashable {
     let stringValue: String
 }
 private protocol SimpleProtocol: Codable, Hashable {
+    associatedtype IntegerValue: RawRepresentable where IntegerValue.RawValue == Int
     // swiftlint:disable unused_declaration
     var nested: NestedStruct { get }
     // swiftlint:disable unused_declaration
-    var intValue: Int { get }
+    var intValue: IntegerValue { get }
 }
 
 private struct SimpleWithAnchor: SimpleProtocol, YamlAnchorProviding {
@@ -308,13 +362,34 @@ private struct SimpleWithoutAnchor: SimpleProtocol {
 
 private struct SimpleWithoutAnchor2: SimpleProtocol {
     let nested: NestedStruct
-    let intValue: Int
+    let intValue: SimpleIntRepresesnting
     // swiftlint:disable unused_declaration
     var unrelatedValue: String?
 }
 
 private struct SimpleWithStringTypeAnchorName: SimpleProtocol {
     let nested: NestedStruct
-    let intValue: Int
+    let intValue: SimpleIntRepresesnting
     var yamlAnchor: String? = "StringTypeAnchor"
+}
+
+extension Int: @retroactive RawRepresentable {
+    public var rawValue: Int {
+        self
+    }
+    
+    public init(rawValue: Int) {
+        self = rawValue
+    }
+}
+
+private struct SimpleIntRepresesnting: RawRepresentable, Codable, Hashable, ExpressibleByIntegerLiteral {
+    init(integerLiteral value: Int) {
+        self.rawValue = value
+    }
+    init(rawValue value: Int) {
+        self.rawValue = value
+    }
+
+    let rawValue: Int
 }

@@ -259,15 +259,40 @@ extension _Encoder: SingleValueEncodingContainer {
             case .none:
                 try encode()
             case let .anchor(anchor):
+                self.node = self.node.setting(anchor: anchor) // a hack
                 try encode()
-                if self.node.isAlias == false {
+                guard self.node.isAlias == false else {
+                    return
                     // Some types are single-value containers, such as types that are RawRepresentable.
                     // In such cases the result of encoding here may have matched an existing Anchor, producing an alias
                     // If the encoding already produced an alias, then the anchor we received here is irrelevant.
-                    self.node = self.node.setting(anchor: anchor)
                 }
+                    
+                guard self.node.anchor != anchor else {
+                    return // nothing left to do
+                }
+                
+                if let orphanedAnchor = self.node.anchor {
+                    // our sub-tree was a single value container which declared an anchor
+                    // that anchor will not be represented in the final tree
+                    // because `anchor` is the prevailing value in this context
+                    // therefore the encoding strategy must remit the anchor,
+                    // allowing it to be deallocated, so no aliases can be made to it.
+                    try redundancyAliasingStrategy.remit(anchor: orphanedAnchor)
+                }
+                
+                self.node = self.node.setting(anchor: anchor)
+                
             case let .alias(anchor):
-                self.node = .alias(.init(anchor))
+                if self.node.anchor == nil {
+                    self.node = .alias(.init(anchor))
+                } else {
+                    // This node can't be both an anchor and an alias.
+                    // The ambiguity arises from single-value container types
+                    // like RawRepresentable types. In this case, we encode
+                    // normally, allowing the exiting anchor to remain.
+                    try encode()
+                }
             }
         } else {
             try encode()

@@ -39,7 +39,7 @@ public protocol RedundancyAliasingStrategy: AnyObject {
     /// referenced by the Encoder and will itself be released.
 
     func releaseAnchorReferences() throws
-    
+
     /// Implementations must remove all reference to the supplied anchor, permitting it to be deallocated.
     func remit(anchor: Anchor) throws
 }
@@ -75,7 +75,7 @@ public class HashableAliasingStrategy: RedundancyAliasingStrategy {
     public func releaseAnchorReferences() throws {
         hashesToAliases.removeAll()
     }
-    
+
     public func remit(anchor: Anchor) throws {
         hashesToAliases.remove(keysForValue: anchor)
     }
@@ -108,7 +108,7 @@ public class StrictEncodableAliasingStrategy: RedundancyAliasingStrategy {
     public func releaseAnchorReferences() throws {
         codedToAliases.removeAll()
     }
-    
+
     public func remit(anchor: Anchor) throws {
         codedToAliases.remove(keysForValue: anchor)
     }

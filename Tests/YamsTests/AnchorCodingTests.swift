@@ -373,7 +373,7 @@ private struct SimpleWithStringTypeAnchorName: SimpleProtocol {
     var yamlAnchor: String? = "StringTypeAnchor"
 }
 
-#if swift(>=5.10)
+#if swift(>=6.0)
 extension Int: @retroactive RawRepresentable {}
 #else
 extension Int: RawRepresentable {}

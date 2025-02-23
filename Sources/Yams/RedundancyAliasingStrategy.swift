@@ -136,10 +136,8 @@ fileprivate extension Dictionary {
 
     func removing(keysForValue: Value) -> Self where Value: Equatable {
         var mutable = Self(minimumCapacity: self.count)
-        for (key, value) in self {
-            if value != keysForValue {
-                mutable[key] = value
-            }
+        for (key, value) in self where value != keysForValue {
+            mutable[key] = value
         }
         return mutable
     }

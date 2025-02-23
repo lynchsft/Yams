@@ -77,7 +77,7 @@ extension Node {
             }
         }
     }
-    
+
     /// Get or set the `Node.Alias` value if this node is a `Node.alias`.
     public var alias: Alias? {
         get {

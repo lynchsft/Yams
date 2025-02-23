@@ -267,11 +267,11 @@ extension _Encoder: SingleValueEncodingContainer {
                     // In such cases the result of encoding here may have matched an existing Anchor, producing an alias
                     // If the encoding already produced an alias, then the anchor we received here is irrelevant.
                 }
-                    
+
                 guard self.node.anchor != anchor else {
                     return // nothing left to do
                 }
-                
+
                 if let orphanedAnchor = self.node.anchor {
                     // our sub-tree was a single value container which declared an anchor
                     // that anchor will not be represented in the final tree
@@ -280,9 +280,9 @@ extension _Encoder: SingleValueEncodingContainer {
                     // allowing it to be deallocated, so no aliases can be made to it.
                     try redundancyAliasingStrategy.remit(anchor: orphanedAnchor)
                 }
-                
+
                 self.node = self.node.setting(anchor: anchor)
-                
+
             case let .alias(anchor):
                 if self.node.anchor == nil {
                     self.node = .alias(.init(anchor))

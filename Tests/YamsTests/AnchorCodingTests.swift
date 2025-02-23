@@ -249,7 +249,7 @@ class AnchorAliasingTests: XCTestCase {
 
                                      """ )
     }
-    
+
     /// If types conform to YamlAnchorProviding and are NOT Hashable-Equal then
     /// HashableAliasingStrategy does not alias them even though their members may still be
     /// Hashable-Equal and therefor maybe aliased.
@@ -302,7 +302,7 @@ class AnchorAliasingTests: XCTestCase {
 
                                      """ )
     }
-    
+
     /// If types conform to YamlAnchorProviding and have exactly the same encoded representation then
     /// StrictEncodableAliasingStrategy alias them even though they are encoded and decoded from
     ///  different types.
@@ -382,7 +382,7 @@ extension Int {
     public var rawValue: Int {
         self
     }
-    
+
     public init(rawValue: Int) {
         self = rawValue
     }

@@ -27,18 +27,14 @@ class AliasingStrategyTests: XCTestCase {
             XCTFail("should be anchor: \(response1)")
             return
         }
-#if swift(>=5.10)
-        _ = consume response1
-#endif
+//        _ = consume response1
 
         let response2 = try strategy.alias(for: subject)
         guard case let .alias(anchor2) = response2 else {
             XCTFail("should be alias: \(response2)")
             return
         }
-#if swift(>=5.10)
-        _ = consume response2
-#endif
+//        _ = consume response2
 
         XCTAssertEqual(anchor1, anchor2)
 
@@ -49,9 +45,7 @@ class AliasingStrategyTests: XCTestCase {
             XCTFail("should be anchor: \(response1)")
             return
         }
-#if swift(>=5.10)
-        _ = consume response3
-#endif
+//        _ = consume response3
 
         XCTAssertNotEqual(anchor1, anchor3)
     }

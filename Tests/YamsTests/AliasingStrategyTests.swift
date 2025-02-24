@@ -6,7 +6,6 @@
 //  Copyright (c) 2024 Yams. All rights reserved.
 //
 
-
 import XCTest
 import Yams
 

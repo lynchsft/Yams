@@ -336,10 +336,7 @@ class AnchorAliasingTests: XCTestCase {
 
 }
 
-
-
 // MARK: - Types used for Anchor encoding tests.
-
 private struct NestedStruct: Codable, Hashable {
     let stringValue: String
 }
@@ -381,9 +378,7 @@ extension Int: @retroactive RawRepresentable {}
 extension Int: RawRepresentable {}
 #endif
 extension Int {
-    public var rawValue: Int {
-        self
-    }
+    public var rawValue: Int { self }
 
     public init(rawValue: Int) {
         self = rawValue

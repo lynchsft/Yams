@@ -256,17 +256,9 @@ extension _Encoder: SingleValueEncodingContainer {
     private func resolveAlias(for encodable: any Encodable, encode: () throws -> Void) throws {
         if let redundancyAliasingStrategy = userInfo[.redundancyAliasingStrategyKey] as? RedundancyAliasingStrategy {
             switch try redundancyAliasingStrategy.alias(for: encodable) {
-            case .none:
-                try encode()
             case let .anchor(anchor):
                 self.node = self.node.setting(anchor: anchor) // a hack
                 try encode()
-                guard self.node.isAlias == false else {
-                    return
-                    // Some types are single-value containers, such as types that are RawRepresentable.
-                    // In such cases the result of encoding here may have matched an existing Anchor, producing an alias
-                    // If the encoding already produced an alias, then the anchor we received here is irrelevant.
-                }
 
                 guard self.node.anchor != anchor else {
                     return // nothing left to do
@@ -291,8 +283,10 @@ extension _Encoder: SingleValueEncodingContainer {
                     // The ambiguity arises from single-value container types
                     // like RawRepresentable types. In this case, we encode
                     // normally, allowing the exiting anchor to remain.
-                    try encode()
+                    fallthrough
                 }
+            case .none:
+                try encode()
             }
         } else {
             try encode()

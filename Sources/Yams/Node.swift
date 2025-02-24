@@ -314,21 +314,6 @@ extension Node {
         return false
     }
 
-    // swiftlint:disable unused_declaration
-    var isScalar: Bool {
-        if case .scalar = self {
-            return true
-        }
-        return false
-    }
-
-    var isAlias: Bool {
-        if case .alias = self {
-            return true
-        }
-        return false
-    }
-
     func setting(anchor: Anchor) -> Self {
         switch self {
         case var .mapping(mapping):

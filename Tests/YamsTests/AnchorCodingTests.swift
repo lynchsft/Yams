@@ -346,7 +346,7 @@ class StrictCodableAliasingStrategyTests: XCTestCase {
             XCTFail("should be anchor: \(response1)")
             return
         }
-#if swift(>=5.9)
+#if swift(>=5.10)
         _ = consume response1
 #endif
 
@@ -355,7 +355,7 @@ class StrictCodableAliasingStrategyTests: XCTestCase {
             XCTFail("should be alias: \(response2)")
             return
         }
-#if swift(>=5.9)
+#if swift(>=5.10)
         _ = consume response2
 #endif
 
@@ -368,7 +368,7 @@ class StrictCodableAliasingStrategyTests: XCTestCase {
             XCTFail("should be anchor: \(response1)")
             return
         }
-#if swift(>=5.9)
+#if swift(>=5.10)
         _ = consume response3
 #endif
 
